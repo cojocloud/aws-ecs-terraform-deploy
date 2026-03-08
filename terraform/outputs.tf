@@ -36,7 +36,7 @@ output "rds_endpoint" {
 
 output "ecr_push_commands" {
   description = "Commands to push Docker image to ECR"
-  value = <<-EOT
+  value       = <<-EOT
     # Login to ECR
     aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${aws_ecr_repository.main.repository_url}
     
