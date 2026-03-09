@@ -1,0 +1,80 @@
+# name: Terraform Apply
+
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'terraform/**'
+#   workflow_dispatch:
+
+# env:
+#   TF_VERSION: '1.6.0'
+#   AWS_REGION: us-east-1
+
+# jobs:
+#   terraform-apply:
+#     name: Terraform Apply
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#       id-token: write
+
+#     defaults:
+#       run:
+#         working-directory: ./terraform
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+#           aws-region: ${{ env.AWS_REGION }}
+
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v3
+#         with:
+#           terraform_version: ${{ env.TF_VERSION }}
+
+#       - name: Terraform Init
+#         run: |
+#           terraform init \
+#             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+#             -backend-config="key=attendance-app/terraform.tfstate" \
+#             -backend-config="region=${{ env.AWS_REGION }}"
+
+#       - name: Terraform Plan
+#         run: |
+#           terraform plan -no-color -input=false \
+#             -var="environment=dev" \
+#             -var="project_name=attendance-app" \
+#             -var="domain_name=tech-with-tobi.com" \
+#             -var="route53_zone_name=tech-with-tobi.com" \
+#             -var="create_route53_record=true" \
+#             -var="db_username=${{ secrets.DB_USERNAME }}" \
+#             -var="db_password=${{ secrets.DB_PASSWORD }}" \
+#             -out=tfplan
+
+#       - name: Terraform Apply
+#         run: terraform apply -auto-approve tfplan
+
+#       - name: Get Outputs
+#         id: outputs
+#         run: |
+#           echo "alb_dns=$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
+#           echo "app_url=$(terraform output -raw application_url)" >> $GITHUB_OUTPUT
+
+#       - name: Deployment Summary
+#         run: |
+#           echo "### 🏗️ Infrastructure Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
+#           echo "" >> $GITHUB_STEP_SUMMARY
+#           echo "**Application URL:** ${{ steps.outputs.outputs.app_url }}" >> $GITHUB_STEP_SUMMARY
+#           echo "**ALB DNS:** ${{ steps.outputs.outputs.alb_dns }}" >> $GITHUB_STEP_SUMMARY
+#           echo "**Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+#           echo "**Environment:** dev" >> $GITHUB_STEP_SUMMARY
+#           echo "" >> $GITHUB_STEP_SUMMARY
+#           echo "🚀 Application is now live and accessible!" >> $GITHUB_STEP_SUMMARY
+#           echo "### 🎉 Deployment Completed!" >> $GITHUB_STEP_SUMMARY 
