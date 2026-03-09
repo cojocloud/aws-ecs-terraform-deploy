@@ -13,6 +13,6 @@ Before starting, ensure you have:
 - Terraform installed (version 1.0+)
 - Docker installed locally (to pull and push images)
 - Basic understanding of AWS services
-- An AWS account with appropriate permissions
+- AWS account with appropriate permissions
 - Optional: A domain name (for SSL setup)
 

@@ -1,6 +1,6 @@
 # Terraform Backend Setup
 
-s3 bucket and dynmodb must exist prior to provisioning the infrastructure
+### s3 bucket and dynamodb must exist prior to provisioning the infrastructure
 
 ## Create S3 bucket for state (use a unique name)
 ```

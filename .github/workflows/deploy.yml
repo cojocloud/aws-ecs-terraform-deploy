@@ -5,9 +5,9 @@
 #     branches:
 #       - main
 #     paths:
-#       - 'app/**'
-#       - 'Dockerfile'
-#       - 'requirements.txt'
+#       - 'files/app/**'
+#       - 'files/Dockerfile'
+#       - 'files/requirements.txt'
 #       - '.github/workflows/deploy.yml'
 
 # env:
