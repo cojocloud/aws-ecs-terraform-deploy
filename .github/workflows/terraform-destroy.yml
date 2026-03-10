@@ -1,62 +1,62 @@
-# name: Terraform Destroy
+name: Terraform Destroy
 
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       confirmation:
-#         description: 'Type "destroy" to confirm deletion of all resources'
-#         required: true
-#         default: ''
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type "destroy" to confirm deletion of all resources'
+        required: true
+        default: ''
 
-# jobs:
-#   destroy:
-#     name: Destroy Infrastructure
-#     runs-on: ubuntu-latest
+jobs:
+  destroy:
+    name: Destroy Infrastructure
+    runs-on: ubuntu-latest
     
-#     if: github.event.inputs.confirmation == 'destroy'
+    if: github.event.inputs.confirmation == 'destroy'
     
-#     permissions:
-#       id-token: write
-#       contents: read
+    permissions:
+      id-token: write
+      contents: read
     
-#     defaults:
-#       run:
-#         working-directory: terraform  # <-- ADD THIS LINE
+    defaults:
+      run:
+        working-directory: terraform  # <-- ADD THIS LINE
     
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-#       - name: Configure AWS credentials
-#         uses: aws-actions/configure-aws-credentials@v4
-#         with:
-#           role-to-assume: arn:aws:iam::180048382895:role/GitHubActionsECSRole
-#           aws-region: us-east-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::180048382895:role/GitHubActionsECSRole
+          aws-region: us-east-1
 
-#       - name: Setup Terraform
-#         uses: hashicorp/setup-terraform@v3
-#         with:
-#           terraform_version: 1.6.0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
 
-#       - name: Terraform Init
-#         run: |
-#           terraform init \
-#             -backend-config="bucket=attendance-app-s3-backend" \
-#             -backend-config="key=attendance-app/terraform.tfstate" \
-#             -backend-config="region=us-east-1"
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=attendance-app-s3-backend" \
+            -backend-config="key=attendance-app/terraform.tfstate" \
+            -backend-config="region=us-east-1"
 
-#       - name: Terraform Destroy
-#         run: |
-#           terraform destroy -auto-approve \
-#             -var="environment=dev" \
-#             -var="project_name=attendance-app" \
-#             -var="db_username=${{ secrets.DB_USERNAME }}" \
-#             -var="db_password=${{ secrets.DB_PASSWORD }}"
+      - name: Terraform Destroy
+        run: |
+          terraform destroy -auto-approve \
+            -var="environment=dev" \
+            -var="project_name=attendance-app" \
+            -var="db_username=${{ secrets.DB_USERNAME }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}"
 
-#       - name: Destroy Complete
-#         run: |
-#           echo "### 🗑️ Infrastructure Destroyed Successfully!" >> $GITHUB_STEP_SUMMARY
-#           echo "" >> $GITHUB_STEP_SUMMARY
-#           echo "All AWS resources have been removed." >> $GITHUB_STEP_SUMMARY
-#           echo "If you need to redeploy, simply trigger the Terraform Apply workflow." >> $GITHUB_STEP_SUMMARY
-#           echo "### 🚀 Cleanup Completed!" >> $GITHUB_STEP_SUMMARY
+      - name: Destroy Complete
+        run: |
+          echo "### 🗑️ Infrastructure Destroyed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All AWS resources have been removed." >> $GITHUB_STEP_SUMMARY
+          echo "If you need to redeploy, simply trigger the Terraform Apply workflow." >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Cleanup Completed!" >> $GITHUB_STEP_SUMMARY
