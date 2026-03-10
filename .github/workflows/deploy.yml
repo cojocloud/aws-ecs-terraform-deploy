@@ -9,6 +9,7 @@ on:
       - 'files/Dockerfile'
       - 'files/requirements.txt'
       - '.github/workflows/deploy.yml'
+    #  - '.github/workflows/**'
 
 env:
   AWS_REGION: us-east-1
