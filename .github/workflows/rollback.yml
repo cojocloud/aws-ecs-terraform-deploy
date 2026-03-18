@@ -1,57 +1,57 @@
-# name: Rollback Deployment
+name: Rollback Deployment
 
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       task_revision:
-#         description: 'Task definition revision to rollback to'
-#         required: true
-#         type: string
+on:
+  workflow_dispatch:
+    inputs:
+      task_revision:
+        description: 'Task definition revision to rollback to'
+        required: true
+        type: string
 
-# env:
-#   AWS_REGION: us-east-1
-#   ECS_CLUSTER: attendance-app-dev-cluster
-#   ECS_SERVICE: attendance-app-dev-service
+env:
+  AWS_REGION: us-east-1
+  ECS_CLUSTER: attendance-app-dev-cluster
+  ECS_SERVICE: attendance-app-dev-service
 
-# jobs:
-#   rollback:
-#     name: Rollback to Previous Version
-#     runs-on: ubuntu-latest
-#     permissions:
-#       id-token: write
-#       contents: read
+jobs:
+  rollback:
+    name: Rollback to Previous Version
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
-#     steps:
-#       - name: Configure AWS credentials
-#         uses: aws-actions/configure-aws-credentials@v4
-#         with:
-#           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-#           aws-region: ${{ env.AWS_REGION }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
-#       - name: Rollback to specified revision
-#         run: |
-#           aws ecs update-service \
-#             --cluster ${{ env.ECS_CLUSTER }} \
-#             --service ${{ env.ECS_SERVICE }} \
-#             --task-definition attendance-app-dev:${{ inputs.task_revision }} \
-#             --force-new-deployment
+      - name: Rollback to specified revision
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --task-definition attendance-app-dev:${{ inputs.task_revision }} \
+            --force-new-deployment
 
-#       - name: Wait for service stability
-#         run: |
-#           aws ecs wait services-stable \
-#             --cluster ${{ env.ECS_CLUSTER }} \
-#             --services ${{ env.ECS_SERVICE }}
+      - name: Wait for service stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }}
 
-#       - name: Rollback Summary
-#         run: |
-#           echo "### ⏪ Rollback Successful" >> $GITHUB_STEP_SUMMARY
-#           echo "" >> $GITHUB_STEP_SUMMARY
-#           echo "**Rolled back to revision:** ${{ inputs.task_revision }}" >> $GITHUB_STEP_SUMMARY
-#           echo "**Cluster:** ${{ env.ECS_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
-#           echo "**Service:** ${{ env.ECS_SERVICE }}" >> $GITHUB_STEP_SUMMARY
-#           echo "**Triggered by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-#           echo "" >> $GITHUB_STEP_SUMMARY
-#           echo "If you need to rollback again, simply trigger this workflow with the desired task revision." >> $GITHUB_STEP_SUMMARY
-#           echo "The service has been successfully rolled back to the specified task definition revision." >> $GITHUB_STEP_SUMMARY
-#           echo "### 🚀 Rollback Completed!" >> $GITHUB_STEP_SUMMARY
+      - name: Rollback Summary
+        run: |
+          echo "### ⏪ Rollback Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Rolled back to revision:** ${{ inputs.task_revision }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Cluster:** ${{ env.ECS_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Service:** ${{ env.ECS_SERVICE }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "If you need to rollback again, simply trigger this workflow with the desired task revision." >> $GITHUB_STEP_SUMMARY
+          echo "The service has been successfully rolled back to the specified task definition revision." >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Rollback Completed!" >> $GITHUB_STEP_SUMMARY
           

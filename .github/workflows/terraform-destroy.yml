@@ -8,21 +8,25 @@ on:
         required: true
         default: ''
 
+env:
+  TF_VERSION: '1.6.0'
+  AWS_REGION: us-east-1
+
 jobs:
   destroy:
     name: Destroy Infrastructure
     runs-on: ubuntu-latest
-    
+
     if: github.event.inputs.confirmation == 'destroy'
-    
+
     permissions:
       id-token: write
       contents: read
-    
+
     defaults:
       run:
-        working-directory: terraform  # <-- ADD THIS LINE
-    
+        working-directory: ./terraform
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,20 +34,20 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::180048382895:role/GitHubActionsECSRole
-          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0
+          terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=attendance-app-s3-backend" \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
             -backend-config="key=attendance-app/terraform.tfstate" \
-            -backend-config="region=us-east-1"
+            -backend-config="region=${{ env.AWS_REGION }}"
 
       - name: Terraform Destroy
         run: |
