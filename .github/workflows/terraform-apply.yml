@@ -76,5 +76,5 @@ jobs:
           echo "**Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** dev" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🚀 Application is now live and accessible!" >> $GITHUB_STEP_SUMMARY
+          echo "Infrastructure provisioned. Push changes to files/ to build and deploy the application." >> $GITHUB_STEP_SUMMARY
           echo "### 🎉 Deployment Completed!" >> $GITHUB_STEP_SUMMARY 
