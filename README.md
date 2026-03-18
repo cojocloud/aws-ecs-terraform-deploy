@@ -151,24 +151,32 @@ This project uses **OIDC federation** — GitHub Actions assumes an AWS IAM role
 
 ```bash
 # Create the OIDC identity provider (one-time per AWS account)
+# Skip this if it already exists — only one provider per account is needed
 aws iam create-open-id-connect-provider \
   --url https://token.actions.githubusercontent.com \
   --client-id-list sts.amazonaws.com \
   --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
+```
 
-# Create the IAM role using the trust policy in this repo
+> If you get `EntityAlreadyExists`, the provider is already set up in your account — skip to creating the role below.
+
+```bash
+# Get the OIDC provider ARN (needed for the trust policy)
+aws iam list-open-id-connect-providers
+
+# Edit github-oidc-trust-policy.json to replace YOUR_GITHUB_ORG/YOUR_REPO
+# with your actual GitHub repository path, then create the role
 aws iam create-role \
   --role-name GitHubActionsECSRole \
   --assume-role-policy-document file://github-oidc-trust-policy.json
 
-# Attach permissions
-aws iam put-role-policy \
+# Attach AdministratorAccess for a dev/POC setup (simplest, avoids permission gaps)
+aws iam attach-role-policy \
   --role-name GitHubActionsECSRole \
-  --policy-name GitHubActionsPermissions \
-  --policy-document file://github-actions-permissions.json
+  --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
 ```
 
-> Edit `github-oidc-trust-policy.json` to replace `YOUR_GITHUB_ORG/YOUR_REPO` with your actual GitHub repository path before running.
+> For a production setup, replace `AdministratorAccess` with the scoped policy in `github-actions-permissions.json` using `aws iam put-role-policy`.
 
 ### 3 — Configure GitHub Secrets and Variables
 
@@ -189,7 +197,7 @@ Navigate to **Settings → Secrets and variables → Actions** in your GitHub re
 
 | Secret | Example Value | Default if not set |
 |---|---|---|
-| `DOMAIN_NAME` | `student-portal.cojocloudsolutions.com` | `""` — deploys HTTP only via ALB DNS |
+| `DOMAIN_NAME` | `attendance-app.cojocloudsolutions.com` | `""` — deploys HTTP only via ALB DNS |
 | `ROUTE53_ZONE_NAME` | `cojocloudsolutions.com` | `""` |
 | `CREATE_ROUTE53_RECORD` | `true` | `false` |
 
@@ -251,12 +259,13 @@ test → security-scan → build-and-deploy
 **Trigger:** Push to `main` with changes in `terraform/` or manual dispatch
 
 - Terraform init → plan → apply
-- Captures ALB DNS and app URL as job summary
+- Job summary shows ALB DNS and custom domain URL (if configured)
 
 ### `terraform-destroy.yml` — Tear Down
 **Trigger:** Manual only — requires typing `destroy` to confirm
 
 Destroys all AWS resources. Use before closing the project to avoid ongoing costs.
+All secrets are sourced from GitHub Secrets — no hardcoded values.
 
 ### `rollback.yml` — Emergency Rollback
 **Trigger:** Manual — provide a task definition revision number
@@ -342,12 +351,22 @@ terraform destroy \
 - Health check path is `/login`. Ensure the app is fully initialised within 300 seconds (grace period).
 - Check CloudWatch logs: `/ecs/attendance-app-dev`
 
-**Terraform backend not found**
-- Ensure the S3 bucket and DynamoDB table exist before running `terraform init` (see Step 1).
+**Terraform backend access denied (S3 403)**
+- Ensure the IAM role has `s3:ListBucket` and `s3:GetObject/PutObject` on the state bucket.
+- For a quick fix on a dev setup, attach `AdministratorAccess` to the role (see Step 2).
+
+**OIDC provider already exists**
+- `EntityAlreadyExists` when creating the OIDC provider is not an error — the provider is shared across the AWS account. Skip that step and proceed to creating the IAM role.
 
 **OIDC authentication failing**
-- Verify the trust policy in `github-oidc-trust-policy.json` matches your exact GitHub org/repo name.
+- Verify the trust policy in `github-oidc-trust-policy.json` matches your exact GitHub org/repo name and branch.
 - Confirm `id-token: write` permission is set in the workflow.
 
+**Custom domain not accessible / HTTPS not working**
+- Check ACM certificate status: must be `ISSUED` before HTTPS works.
+- Verify your domain registrar's nameservers match the Route 53 hosted zone nameservers.
+- Test DNS propagation: `nslookup attendance-app.cojocloudsolutions.com 8.8.8.8`
+- Allow up to 60 minutes for DNS propagation after the Route 53 record is created.
+
 **ECR push denied**
-- The `AmazonECSTaskExecutionRolePolicy` and custom permissions in `github-actions-permissions.json` must be attached to the GitHub Actions IAM role.
+- Ensure `AdministratorAccess` or the scoped policy in `github-actions-permissions.json` is attached to the GitHub Actions IAM role.
