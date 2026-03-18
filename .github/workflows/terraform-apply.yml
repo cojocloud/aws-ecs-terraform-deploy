@@ -71,10 +71,13 @@ jobs:
         run: |
           echo "### 🏗️ Infrastructure Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Application URL:** ${{ steps.outputs.outputs.app_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "**ALB DNS:** ${{ steps.outputs.outputs.alb_dns }}" >> $GITHUB_STEP_SUMMARY
+          echo "**ALB DNS:** http://${{ steps.outputs.outputs.alb_dns }}" >> $GITHUB_STEP_SUMMARY
+          if [[ -n "${{ secrets.DOMAIN_NAME }}" ]]; then
+            echo "**Custom Domain:** https://${{ secrets.DOMAIN_NAME }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** dev" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Infrastructure provisioned. Push changes to files/ to build and deploy the application." >> $GITHUB_STEP_SUMMARY
-          echo "### 🎉 Deployment Completed!" >> $GITHUB_STEP_SUMMARY 
+          echo "### 🎉 Deployment Completed!" >> $GITHUB_STEP_SUMMARY

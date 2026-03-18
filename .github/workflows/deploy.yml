@@ -156,4 +156,7 @@ jobs:
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🌐 Application is now live and accessible!" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** http://${{ steps.alb.outputs.dns }}" >> $GITHUB_STEP_SUMMARY
+          echo "**ALB DNS:** http://${{ steps.alb.outputs.dns }}" >> $GITHUB_STEP_SUMMARY
+          if [[ -n "${{ secrets.DOMAIN_NAME }}" ]]; then
+            echo "**Custom Domain:** https://${{ secrets.DOMAIN_NAME }}" >> $GITHUB_STEP_SUMMARY
+          fi
