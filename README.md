@@ -185,15 +185,15 @@ Navigate to **Settings → Secrets and variables → Actions** in your GitHub re
 | `DB_USERNAME` | `dbadmin` | RDS master username |
 | `DB_PASSWORD` | `MySecurePass123!` | RDS master password (min 8 chars) |
 
-**Variables** — optional, go to the **Variables** tab (only needed for custom domain + HTTPS):
+**Secrets (continued)** — optional, add these to the **Secrets** tab if using a custom domain + HTTPS:
 
-| Variable | Example Value | Default if not set |
+| Secret | Example Value | Default if not set |
 |---|---|---|
-| `DOMAIN_NAME` | `app.cojocloudsolutions.com` | `""` — deploys HTTP only via ALB DNS |
+| `DOMAIN_NAME` | `student-portal.cojocloudsolutions.com` | `""` — deploys HTTP only via ALB DNS |
 | `ROUTE53_ZONE_NAME` | `cojocloudsolutions.com` | `""` |
 | `CREATE_ROUTE53_RECORD` | `true` | `false` |
 
-> If you skip the Variables, the app deploys over HTTP and is accessible via the ALB DNS name printed in the workflow summary. All other Terraform variables (`aws_region`, `vpc_cidr`, `desired_count`, etc.) already have defaults in `variables.tf` and do not need to be set anywhere.
+> If you skip the domain secrets, the app deploys over HTTP and is accessible via the ALB DNS name printed in the workflow summary. All other Terraform variables (`aws_region`, `vpc_cidr`, `desired_count`, etc.) already have defaults in `variables.tf` and do not need to be set anywhere.
 
 ### 4 — Deploy Infrastructure
 

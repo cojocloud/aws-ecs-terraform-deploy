@@ -137,6 +137,15 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
+      - name: Get ALB DNS
+        id: alb
+        run: |
+          ALB_DNS=$(aws elbv2 describe-load-balancers \
+            --names "attendance-app-dev-alb" \
+            --query "LoadBalancers[0].DNSName" \
+            --output text)
+          echo "dns=$ALB_DNS" >> $GITHUB_OUTPUT
+
       - name: Deployment Summary
         run: |
           echo "### 🚀 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
@@ -145,3 +154,6 @@ jobs:
           echo "**Cluster:** ${{ env.ECS_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
           echo "**Service:** ${{ env.ECS_SERVICE }}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 Application is now live and accessible!" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** http://${{ steps.alb.outputs.dns }}" >> $GITHUB_STEP_SUMMARY

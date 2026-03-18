@@ -51,9 +51,9 @@ jobs:
           terraform plan -no-color -input=false \
             -var="environment=dev" \
             -var="project_name=attendance-app" \
-            -var="domain_name=${{ vars.DOMAIN_NAME || '' }}" \
-            -var="route53_zone_name=${{ vars.ROUTE53_ZONE_NAME || '' }}" \
-            -var="create_route53_record=${{ vars.CREATE_ROUTE53_RECORD || 'false' }}" \
+            -var="domain_name=${{ secrets.DOMAIN_NAME || '' }}" \
+            -var="route53_zone_name=${{ secrets.ROUTE53_ZONE_NAME || '' }}" \
+            -var="create_route53_record=${{ secrets.CREATE_ROUTE53_RECORD || 'false' }}" \
             -var="db_username=${{ secrets.DB_USERNAME }}" \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -out=tfplan
